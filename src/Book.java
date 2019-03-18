@@ -1,5 +1,3 @@
-import java.util.Comparator;
-
 /*
  * File Name : Book.java
  * Part of Assignment : Project
@@ -9,13 +7,16 @@ import java.util.Comparator;
  * Purpose : Book object that will be
  * 	Collected into a list. 
  */
+import java.util.Comparator;
+
 public class Book{
-	private int intID;
-	private int intISBN;
-	private String strTitle;
-	private String strAuthor;
-	private boolean CheckedOut = false;
-	public static int intNumOfBooks = 0;
+	private int intID; // Allows for multiple instances of the same book.
+	private int intISBN; // ISBN number for book.
+	private String strTitle; // String title of book.
+	private String strAuthor; // Author of the book.
+	private boolean CheckedOut = false; // Indicates whether book is checked out.
+	public static int intNumOfBooks = 0; // Keeps tally of total books.
+	public Member checkedOutBy; // Indicates who has checked out the book. 
 	
 	Book(){
 		// ID and ISBN will be considered invalid
@@ -34,27 +35,16 @@ public class Book{
 		setStrAuthor(Author);
 	}
 	
-	public void Checkout() {
+	// Checks out book if it is available.
+	public void Checkout(Member checkedOutBy) throws BookCheckedOutException{
 		if(!isCheckedOut()) {
 			setCheckedOut(true);
+			setCheckedOutBy(checkedOutBy);
+			System.out.println(this.strTitle + " is now checked out");
+		} else {
+			throw new BookCheckedOutException(this.strTitle);
 		}
 	}
-	
-	public static Comparator<Book> BookISBNComparator = new Comparator<Book>(){
-		public int compare(Book book1, Book book2) {
-			int bookISBN1 = book1.intISBN;
-			int bookISBN2 = book2.intISBN;
-			return (bookISBN1 - bookISBN2);
-		}
-	};
-	
-	public static Comparator<Book> BookTitleComparator = new Comparator<Book>() {
-		public int compare(Book book1, Book book2) {
-			String title1 = book1.strTitle;
-			String title2 = book2.strTitle;
-			return title1.compareTo(title2);
-		}
-	};
 	
 	public int getIntId() {
 		return intID;
@@ -104,15 +94,63 @@ public class Book{
 	}
 
 	
-	private void setCheckedOut(boolean CheckedOut) {
+	public void setCheckedOut(boolean CheckedOut) {
 		this.CheckedOut = CheckedOut;
 	}
 	
+	public Member getCheckedOutBy() {
+		return checkedOutBy;
+	}
+
+	public void setCheckedOutBy(Member checkedOutBy) {
+		this.checkedOutBy = checkedOutBy;
+	}
+	
+	/*
+	 * Override of toString that shows book info with ';' delimiter
+	 */
 	public String toString() {
 		String returnString = "";
 		returnString = returnString.concat(Integer.toString(this.intISBN));
+		returnString = returnString.concat(";");
 		returnString = returnString.concat(this.strTitle);
+		returnString = returnString.concat(";");
 		returnString = returnString.concat(this.strAuthor);
+		returnString = returnString.concat(";");
+		try {
+			returnString = returnString.concat(this.checkedOutBy.strEMail);			
+		} catch(Exception ex) {
+			returnString = returnString.concat("Available");
+		}
+		returnString = returnString.concat(";");
 		return returnString;
+	}
+}
+
+//Comparator interface used to sort books by ISBN
+class BookISBNComparator implements Comparator<Book> {
+	@Override
+	public int compare(Book book1, Book book2) {
+		int bookISBN1 = book1.getIntISBN();
+		int bookISBN2 = book2.getIntISBN();
+		return (bookISBN1 - bookISBN2);
+	}
+}
+
+//Comparator interface used to sort books by Title
+class BookTitleComparator implements Comparator<Book> {
+	public int compare(Book book1, Book book2) {
+		String title1 = book1.getStrTitle();
+		String title2 = book2.getStrTitle();
+		return title1.compareTo(title2);
+	}
+}
+
+//Comparator interface used to sort books by Author
+class BookAuthorComparator implements Comparator<Book> {
+	public int compare(Book book1, Book book2) {
+		String title1 = book1.getStrAuthor();
+		String title2 = book2.getStrAuthor();
+		return title1.compareTo(title2);
 	}
 }
